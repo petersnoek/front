@@ -4,15 +4,36 @@ $result = '';
 
 if(isset($_POST['word'])) {
 
+    // send API request to http://api.mac/index.php?word=schaap
     $word = $_POST['word'];
     $url = 'api.mac/?word='.$word;
 
+    // let cUrl handle sending the request and getting a response
     $curl = curl_init();
     curl_setopt($curl, CURLOPT_URL, $url);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-
     $result = curl_exec($curl);
 
+    /* expected result
+        {
+            "status": true,
+            "message": {
+                "status": true,
+                "results": {
+                    "nl-NL": [
+                        "resultaat 1",
+                        "resultaat 2"
+                    ],
+                    "en-UK": [
+                        "result 1",
+                        "result 2"
+                    ]
+                }
+            }
+        }
+    */
+
+    // TODO: error handling; result can be "false" or 404 (not found)
     $items = json_decode($result);
 
     $vertalingen = $items->message->results;
@@ -73,9 +94,20 @@ if(isset($_POST['word'])) {
             </form>
 
         </p>
-        <p>
-            <?php var_dump($vertalingen); ?>
-        </p>
+        <ul>
+            <?php
+                foreach($vertalingen as $land=>$betekenissen) {
+                    echo "<li>";
+                    echo $land;
+                        echo "<ul>";
+                        foreach($betekenissen as $betekenis) {
+                            echo "<li>" . $betekenis . "</li>";
+                        }
+                        echo "</ul>";
+                    echo "</li>";
+                }
+            ?>
+        </ul>
     </div>
 
 </main><!-- /.container -->
